@@ -1,7 +1,8 @@
 
 API Document
 Hotel Booking System 
-
+POSTMAN Link : https://www.getpostman.com/collections/c9bf01cf4ab29d23e946
+Contact for Whitelisting the Mongo Instance for your public ip
 Contents
 
 1.	Hotel registration
