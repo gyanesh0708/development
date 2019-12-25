@@ -19,9 +19,13 @@ Contents
 8.	User point update
 
 Registration of hotel
+
 URL : localhost:3000/api/hotel/create.
+
 Type: POST
+
 header :{ Content-Type : application/json}
+
 body :{
     "hotelName": "mumbai - Paradise",
     "type": "5 Star",
@@ -30,6 +34,7 @@ body :{
      "totalRooms":20,
     "totalRoomsAvailabe":20
 }
+
 Response : {
     "hotelName": "mumbai - Paradise",
     "type": "5 Star",
@@ -40,8 +45,11 @@ Response : {
 }
 
 List of Hotels
+
 URL: 	localhost:3000/api/hotel/list?offset=0
+
 Type: GET
+
 Response : {
     "docs": [
         {
@@ -64,13 +72,18 @@ Response : {
 }
 
 Hotel Booking by User
+
 URL : localhost:3000/api/hotel/booking
+
 Type: POST
+
 header :{ Content-Type : application/json}
+
 body {
 	"hid" :"5e031f2e9eeb4b2ba8b477a0" ,  // _id of Hotel from the hotel list 
 	"uid" : "5e031f549eeb4b2ba8b477a1"  //  _id of user from login response
 }
+
 Response : {
     "_id": "5e031f549eeb4b2ba8b477a1",
     "name": "naveen.singh@gmail.com",
@@ -91,14 +104,19 @@ Response : {
 }
 
 Hotel Booking Cancel by User
+
 URL : localhost:3000/api/hotel/bookingCancel
+
 Type: POST
+
 header :{ Content-Type : application/json}
+
 body {
 "hid" :"5e031f2e9eeb4b2ba8b477a0" ,  // _id of Hotel from the hotel list 
 "uid" : "5e031f549eeb4b2ba8b477a1"  //  _id of user from login response,
 "bookingId": "5e031f2e9eeb4b2ba8b477a05e031f549eeb4b2ba8b477a11577263050471" // from booking Response 
 }
+
 Response : {
     "_id": "5e031f549eeb4b2ba8b477a1",
     "name": "naveen.singh@gmail.com",
@@ -114,24 +132,35 @@ Response : {
             "contact": 787879692393,
             "RoomNo": 20
         } ],  "bonus": 300}
+	
 User Signup
+
 URL : localhost:3000/ api/users/create
+
 Type: POST
+
 header :{ Content-Type : application/json}
+
 body {
 	"name":"gyanesh.saikhedkar@gmail.com",
 	"password" : "hotel@1234"
 }
+
 Response : User Created Succesfully
 
 User Login
+
 URL : localhost:3000/ api/users/login
+
 Type: POST
+
 header :{ Content-Type : application/json}
+
 body {
 	"name":"gyanesh.saikhedkar@gmail.com",
 	"password" : "hotel@1234"
 }
+
 Response : {
     "_id": "5e031f549eeb4b2ba8b477a1",
     "name": "naveen.singh@gmail.com",
@@ -140,13 +169,18 @@ Response : {
 }
 
 User Bonus Update
+
 URL : localhost:3000/ api/users/ pointUpdate
+
 Type: POST
+
 header :{ Content-Type : application/json}
+
 body {
 	"uid" : "5e01a64eaf7572109c3e2970", // User _id
 	"bonus" : 400
 }
+
 Response : {
     "_id": "5e01a64eaf7572109c3e2970",
     "name": "gyanesh.gyanesh@gmail.com",
@@ -154,8 +188,11 @@ Response : {
 }
 
 User List
+
 URL : localhost:3000/api/users/list?offset=0
+
 Type: GET
+
 Response : {
     "docs": [
         {
