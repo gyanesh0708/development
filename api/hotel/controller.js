@@ -52,13 +52,30 @@ controller.booking = async (req, res) => {
         let user = await Users.findOne(userQuery);
         var bookedRoomNo = foundhotel.totalRoomsAvailabe
         var bookingId = req.body.hid + req.body.uid + Date.now()
-        console.log(bookingId)
-        if (foundhotel.totalRoomsAvailabe >= 1 && user.bonus >= 200) {
+        var bookingStatus = "PENDING APPROVAL";
+        var bookingAmt = 0;
+
+        if (foundhotel && user) {
+            if (foundhotel.totalRoomsAvailabe >= 1 && user.bonus >= 200) {
+                bookingStatus = "BOOKED"
+                bookingAmt = -200
+            }
             let bookingObj = {
                 "uid": req.body.uid,
                 "bookingId": bookingId,
+                "bookingStatus": bookingStatus,
                 "name": user.name,
                 "RoomNo": bookedRoomNo
+            }
+            let hotelBookingObj = {
+                "hid": foundhotel._id,
+                "hotelName": foundhotel.hotelName,
+                "bookingId": bookingId,
+                "bookingStatus": bookingStatus,
+                "typed": foundhotel.type,
+                "address": foundhotel.address,
+                "contact": Number(foundhotel.contact),
+                "RoomNo": Number(bookedRoomNo)
             }
             let hotelUpdater = {
                 $push: {
@@ -82,28 +99,20 @@ controller.booking = async (req, res) => {
                     "hotelBookings": 1
                 }
             };
-            let foundhotel = await Hotel.findOneAndUpdate(hotelQuery, hotelUpdater, options)
+            let foundhotelUpdate = await Hotel.findOneAndUpdate(hotelQuery, hotelUpdater, options)
             let userUpdater = {
                 $push: {
-                    hotelBookings: {
-                        "hid": foundhotel._id,
-                        "hotelName": foundhotel.hotelName,
-                        "bookingId": bookingId,
-                        "typed": foundhotel.type,
-                        "address": foundhotel.address,
-                        "contact": Number(foundhotel.contact),
-                        "RoomNo": Number(bookedRoomNo)
-                    }
+                    hotelBookings: hotelBookingObj
                 },
                 $inc: {
                     "totalBooking": 1,
-                    "bonus": -200
+                    "bonus": bookingAmt
                 }
             }
-            let userBooking = await Users.findOneAndUpdate(userQuery, userUpdater, options)
-            if (foundhotel && userBooking) {
+            let userBookingUpdate = await Users.findOneAndUpdate(userQuery, userUpdater, options)
+            if (foundhotelUpdate && userBookingUpdate) {
 
-                return res.status(200).send(userBooking);
+                return res.status(200).send(userBookingUpdate);
             } else {
                 res.status(200).send({
                     'Error': "Hotel does not exist.Booking Cannot be done at this moment!!"
@@ -111,7 +120,6 @@ controller.booking = async (req, res) => {
             }
 
         } else {
-
             return res.status(200).send({
                 'msg': 'Rooms not availabe at this moment try again later'
             });

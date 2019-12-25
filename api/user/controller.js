@@ -33,18 +33,24 @@ controller.pointUpdate = async (req, res) => {
         query._id = req.body.uid;
         user = await Users.findOne(query).lean();
         if (user) {
-            let updater = {$inc: {
-                "bonus": req.body.bonus
-            }}
-            let options = {select: {
-                "_id": 1,
-                "name": 1,
-                "bonus": 1
-            }}
-            let updateUser = await Users.findOneAndUpdate(query, updater,options)
+            let updater = {
+                $inc: {
+                    "bonus": req.body.bonus
+                }
+            }
+            let options = {
+                select: {
+                    "_id": 1,
+                    "name": 1,
+                    "bonus": 1
+                }
+            }
+            let updateUser = await Users.findOneAndUpdate(query, updater, options)
             return res.status(200).send(updateUser);
         } else {
-            return res.status(404).send({'msg':'User does not exist!!'});
+            return res.status(404).send({
+                'msg': 'User does not exist!!'
+            });
         }
     } catch (err) {
         res.status(500).send('internal server error', err);
@@ -63,8 +69,8 @@ controller.list = async (req, res) => {
                 "_id": 1,
                 "name": 1,
                 "bonus": 1,
-                "hotelBookings" : 1,
-                "totalBooking" : 1
+                "hotelBookings": 1,
+                "totalBooking": 1
             },
             limit: 10,
             offset: 0
@@ -94,8 +100,8 @@ controller.login = async (req, res) => {
                     "_id": foundUser._id,
                     "name": foundUser.name,
                     "bonus": foundUser.bonus,
-                    "hotelBookings" : foundUser.hotelBookings,
-                    "totalBooking" : foundUser.totalBooking
+                    "hotelBookings": foundUser.hotelBookings,
+                    "totalBooking": foundUser.totalBooking
                 });
             } else {
                 res.status(200).send({

@@ -22,6 +22,7 @@ const HotelSchema = new Schema({
     bookings: [{
         "uid": String,
         "bookingId" : String,
+        "bookingStatus": String,
         "name": String,
         "RoomNo": Number
     }],

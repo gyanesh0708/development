@@ -15,6 +15,7 @@ const UsersSchema = new Schema({
         hotelName: String,
         typed: String,
         bookingId : String,
+        bookingStatus: String,
         address: String,
         contact: Number,
         RoomNo: Number,
