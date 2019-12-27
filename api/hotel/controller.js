@@ -6,7 +6,7 @@ const controller = {};
 controller.create = async (req, res) => {
     try {
         const hotel = await new Hotel(req.body);
-        console.log(hotel.save());
+        await hotel.save();
         return res.status(200).send(req.body);
     } catch {
         return res.status(500).send({
@@ -50,22 +50,71 @@ controller.booking = async (req, res) => {
         userQuery._id = req.body.uid;
         let foundhotel = await Hotel.findOne(hotelQuery);
         let user = await Users.findOne(userQuery);
-        var bookedRoomNo = foundhotel.totalRoomsAvailabe
         var bookingId = req.body.hid + req.body.uid + Date.now()
         var bookingStatus = "PENDING APPROVAL";
         var bookingAmt = 0;
+        var userHotelBookingResult = user.hotelBookings
+        var foundhotelBookingResult = foundhotel.bookings
+        var pendingBooking = 0;
+        var hotelPendingBooking = 0;
+        var requestObj = {
+            "hid": "",
+            "uid": "",
+            "bookingId": ""
+        }
 
-        if (foundhotel && user) {
+        for (var i = 0; i < userHotelBookingResult.length; i++) {
+            if (userHotelBookingResult[i].bookingStatus == "PENDING APPROVAL") {
+                pendingBooking = pendingBooking + 1
+            }
+        }
+        for (var j = 0; j < foundhotelBookingResult.length; j++) {
+            if (foundhotelBookingResult[j].bookingStatus == "PENDING APPROVAL") {
+                hotelPendingBooking = hotelPendingBooking + 1
+                requestObj.hid = foundhotel._id
+                requestObj.bookingId = foundhotelBookingResult[j].bookingId
+                requestObj.uid = foundhotelBookingResult[j].uid
+            }
+        }
+        if (foundhotel && user && pendingBooking < 1) { 
             if (foundhotel.totalRoomsAvailabe >= 1 && user.bonus >= 200) {
                 bookingStatus = "BOOKED"
                 bookingAmt = -200
+            }
+            if (foundhotel.totalRoomsAvailabe == 0 && hotelPendingBooking >= 1) {
+                console.log("totalRoomsAvailabe 0 and  hotelPendingBooking " + hotelPendingBooking)
+                if (user.bonus >= 200) {
+                    bookingStatus = "BOOKED"
+                    bookingAmt = -200
+                }
+                let genericBookingCancelResponse = await genericBookingCancel(requestObj);
+                if (genericBookingCancelResponse.responseMsg != "Booking Cancel Success!!") {
+                  return  res.status(200).send({
+                        "hotelName": foundhotel.hotelName,
+                        "totalRoomsAvailable": foundhotel.totalRoomsAvailabe,
+                        "pendingBooking": pendingBooking,
+                        "userBonus": user.bonus,
+                        "server_msg": "Sorry we are not able to serve you at this moment!!"
+                    });
+                }else{
+                    foundhotel.totalRoomsAvailabe = foundhotel.totalRoomsAvailabe + 1
+                }
+            }
+            if (foundhotel.totalRoomsAvailabe == 0 && hotelPendingBooking == 0) {
+                return  res.status(200).send({
+                        "hotelName": foundhotel.hotelName,
+                        "totalRoomsAvailable": foundhotel.totalRoomsAvailabe,
+                        "pendingBooking": pendingBooking,
+                        "userBonus": user.bonus,
+                        "server_msg": "There is no room available at this moment!!"
+                    });
             }
             let bookingObj = {
                 "uid": req.body.uid,
                 "bookingId": bookingId,
                 "bookingStatus": bookingStatus,
                 "name": user.name,
-                "RoomNo": bookedRoomNo
+                "RoomNo": foundhotel.totalRoomsAvailabe
             }
             let hotelBookingObj = {
                 "hid": foundhotel._id,
@@ -75,7 +124,7 @@ controller.booking = async (req, res) => {
                 "typed": foundhotel.type,
                 "address": foundhotel.address,
                 "contact": Number(foundhotel.contact),
-                "RoomNo": Number(bookedRoomNo)
+                "RoomNo": Number(foundhotel.totalRoomsAvailabe)
             }
             let hotelUpdater = {
                 $push: {
@@ -111,7 +160,6 @@ controller.booking = async (req, res) => {
             }
             let userBookingUpdate = await Users.findOneAndUpdate(userQuery, userUpdater, options)
             if (foundhotelUpdate && userBookingUpdate) {
-
                 return res.status(200).send(userBookingUpdate);
             } else {
                 res.status(200).send({
@@ -120,9 +168,21 @@ controller.booking = async (req, res) => {
             }
 
         } else {
-            return res.status(200).send({
-                'msg': 'Rooms not availabe at this moment try again later'
-            });
+            var server_msg = "";
+            if (pendingBooking > 1) {
+                server_msg = "User cannot have more than one pending approval!!"
+            } else if (user.bonus < 200) {
+                server_msg = "User do not have Enough Bonus to complete this booking!!"
+            } else if (!foundhotel.totalRoomsAvailabe > 1) {
+                server_msg = "There is no room available at this moment!!"
+            }
+            let responseObj = {
+                "totalRoomsAvailable": foundhotel.totalRoomsAvailabe,
+                "pendingBooking": pendingBooking,
+                "userBonus": user.bonus,
+                "server_msg": server_msg
+            }
+            return res.status(200).send(responseObj);
 
         }
     } catch (err) {
@@ -135,16 +195,33 @@ controller.booking = async (req, res) => {
 }
 
 controller.bookingCancel = async (req, res) => {
+
+    let queryObj = {
+        hid: req.body.hid,
+        uid: req.body.uid,
+        bookingId: req.body.bookingId
+    }
+    let responseObj = await genericBookingCancel(queryObj)
+    res.status(responseObj.responseCode).send(responseObj);
+}
+
+
+async function genericBookingCancel(queryObj) {
+    let callbackresponseObj = {
+        responseCode: 0,
+        responseMsg: "",
+        responseObj: ""
+    }
     try {
         let hotelQuery = {
-            "_id": req.body.hid,
-            "bookings.uid": req.body.uid,
-            "bookings.bookingId": req.body.bookingId
+            "_id": queryObj.hid,
+            "bookings.uid": queryObj.uid,
+            "bookings.bookingId": queryObj.bookingId
         }
         let userQuery = {
-            "_id": req.body.uid,
-            "hotelBookings.hid": req.body.hid,
-            "hotelBookings.bookingId": req.body.bookingId
+            "_id": queryObj.uid,
+            "hotelBookings.hid": queryObj.hid,
+            "hotelBookings.bookingId": queryObj.bookingId
         }
         let foundhotel = await Hotel.findOne(hotelQuery);
         let foundUser = await Users.findOne(userQuery);
@@ -152,7 +229,7 @@ controller.bookingCancel = async (req, res) => {
             let hotelUpdater = {
                 $pull: {
                     "bookings": {
-                        "bookingId": req.body.bookingId
+                        "bookingId": queryObj.bookingId
                     }
                 },
                 $inc: {
@@ -177,7 +254,7 @@ controller.bookingCancel = async (req, res) => {
             let userUpdater = {
                 $pull: {
                     hotelBookings: {
-                        "bookingId": req.body.bookingId
+                        "bookingId": queryObj.bookingId
                     }
                 },
                 $inc: {
@@ -186,30 +263,30 @@ controller.bookingCancel = async (req, res) => {
             }
             let userBooking = await Users.findOneAndUpdate(userQuery, userUpdater, options)
             if (foundhotel && userBooking) {
-                return res.status(200).send(userBooking);
+                callbackresponseObj.responseCode = 200;
+                callbackresponseObj.responseMsg = "Booking Cancel Success!!";
+                callbackresponseObj.responseObj = userBooking;
+                return callbackresponseObj;
             } else {
-                res.status(200).send({
-                    'Error': "Unable to cancel the booking at this moment.Contact admin!!"
-                });
+                callbackresponseObj.responseCode = 200;
+                callbackresponseObj.responseMsg = "Unable to cancel the booking at this moment.Contact admin!!";
+                return callbackresponseObj;
+
             }
 
         } else {
+            callbackresponseObj.responseCode = 200;
+            callbackresponseObj.responseMsg = "No booking found with the reference id provided!!";
+            return callbackresponseObj;
 
-            return res.status(200).send({
-                'msg': 'No booking found with the reference id provided!!'
-            });
 
         }
     } catch (err) {
         console.log(err)
-        res.status(500).send({
-            'msg': "Something went wrong!!"
-        });
+        callbackresponseObj.responseCode = 500;
+        callbackresponseObj.responseMsg = "Something went Wrong!!";
+        return callbackresponseObj;
     }
-
 }
-
-
-
 
 module.exports = controller;

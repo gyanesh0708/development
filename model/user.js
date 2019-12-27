@@ -34,6 +34,7 @@ const UsersSchema = new Schema({
 
 UsersSchema.methods.setPassword = function(password) {
     this.salt = crypto.randomBytes(16).toString('hex');
+    // crypto.pbkdf2Sync(password, salt, iterations, keylen, digest)
     this.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 100, 'sha512')
         .toString('hex');
 }

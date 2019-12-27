@@ -28,11 +28,13 @@ mongoose.connect(env.dbUrl, {
         console.log("connect to db failed ", err);
     });
 
+
 // Endpoints
 app.use('/api/hotel', require('./api/hotel'));
 app.use('/api/users', require('./api/user'));
 
 app.get('/', (req, res) => {
+
     res.send('Welcome to Home Page!!')
 });
 
