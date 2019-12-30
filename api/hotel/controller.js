@@ -93,7 +93,6 @@ controller.booking = async (req, res) => {
                 bookingAmt = -200
             }
             if (foundhotel.totalRoomsAvailabe == 0 && hotelPendingBooking >= 1) {
-                console.log("totalRoomsAvailabe 0 and  hotelPendingBooking " + hotelPendingBooking)
                 if (user.bonus >= 200) {
                     bookingStatus = "BOOKED"
                     bookingAmt = -200

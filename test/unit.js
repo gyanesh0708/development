@@ -48,76 +48,76 @@ let hotel_2 = {
 
 
 
-    describe('Case 1 :  User 1 Sign Up: /api/users/create', () => {
+describe('Case 1 :  User 1 Sign Up: /api/users/create', () => {
 
-        it('it should create new User for ' + user.name, (done) => {
+    it('it should create new User for ' + user.name, (done) => {
 
-            chai.request(serverUrl)
-                .post('/api/users/create')
-                .send(user)
-                .end((err, res) => {
-                    res.should.have.status(200);
-                    res.should.be.json;
-                    res.body.should.be.a('object');
-                    res.body.should.have.property('_id');
-                    res.body.should.have.property('name');
-                    res.body.should.have.property('bonus');
-                    res.body.should.have.property('hotelBookings');
-                    res.body.hotelBookings.should.be.a('array');
-                    res.body.name.should.equal(user.name);
-                    res.body.bonus.should.equal(500);
-                    done();
-                });
+        chai.request(serverUrl)
+            .post('/api/users/create')
+            .send(user)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.should.be.json;
+                res.body.should.be.a('object');
+                res.body.should.have.property('_id');
+                res.body.should.have.property('name');
+                res.body.should.have.property('bonus');
+                res.body.should.have.property('hotelBookings');
+                res.body.hotelBookings.should.be.a('array');
+                res.body.name.should.equal(user.name);
+                res.body.bonus.should.equal(500);
+                done();
+            });
 
 
-        });
     });
+});
 
-    describe('Case 2 :  Registering Two hotel :/api/hotel/create', () => {
+describe('Case 2 :  Registering Two hotel :/api/hotel/create', () => {
 
-        it('it should create 2 new Hotel ', (done) => {
+    it('it should create 2 new Hotel ', (done) => {
 
-            chai.request(serverUrl)
-                .post('/api/hotel/create')
-                .send(hotel_1)
-                .end((err, res) => {
-                    res.should.have.status(200);
-                    res.should.be.json;
-                    res.body.should.be.a('object');
-                    res.body.should.have.property('address');
-                    res.body.should.have.property('createdOn');
-                    res.body.should.have.property('updatedOn');
-                    res.body.should.have.property('_id');
-                    res.body.should.have.property('hotelName');
-                    res.body.should.have.property('type');
-                    res.body.should.have.property('contact');
-                    res.body.should.have.property('totalRooms');
-                    res.body.should.have.property('totalRoomsAvailabe');
-                    res.body.should.have.property('bookings');
-                    res.body.bookings.should.be.a('array');
-                });
-            chai.request(serverUrl)
-                .post('/api/hotel/create')
-                .send(hotel_2)
-                .end((err, res) => {
-                    res.should.have.status(200);
-                    res.should.be.json;
-                    res.body.should.be.a('object');
-                    res.body.should.have.property('address');
-                    res.body.should.have.property('createdOn');
-                    res.body.should.have.property('updatedOn');
-                    res.body.should.have.property('_id');
-                    res.body.should.have.property('hotelName');
-                    res.body.should.have.property('type');
-                    res.body.should.have.property('contact');
-                    res.body.should.have.property('totalRooms');
-                    res.body.should.have.property('totalRoomsAvailabe');
-                    res.body.should.have.property('bookings');
-                    res.body.bookings.should.be.a('array');
-                    done();
-                });
-        });
+        chai.request(serverUrl)
+            .post('/api/hotel/create')
+            .send(hotel_1)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.should.be.json;
+                res.body.should.be.a('object');
+                res.body.should.have.property('address');
+                res.body.should.have.property('createdOn');
+                res.body.should.have.property('updatedOn');
+                res.body.should.have.property('_id');
+                res.body.should.have.property('hotelName');
+                res.body.should.have.property('type');
+                res.body.should.have.property('contact');
+                res.body.should.have.property('totalRooms');
+                res.body.should.have.property('totalRoomsAvailabe');
+                res.body.should.have.property('bookings');
+                res.body.bookings.should.be.a('array');
+            });
+        chai.request(serverUrl)
+            .post('/api/hotel/create')
+            .send(hotel_2)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.should.be.json;
+                res.body.should.be.a('object');
+                res.body.should.have.property('address');
+                res.body.should.have.property('createdOn');
+                res.body.should.have.property('updatedOn');
+                res.body.should.have.property('_id');
+                res.body.should.have.property('hotelName');
+                res.body.should.have.property('type');
+                res.body.should.have.property('contact');
+                res.body.should.have.property('totalRooms');
+                res.body.should.have.property('totalRoomsAvailabe');
+                res.body.should.have.property('bookings');
+                res.body.bookings.should.be.a('array');
+                done();
+            });
     });
+});
 
 
 
@@ -146,7 +146,7 @@ describe('Case 4 : Siging Up User again which was already signed up : /api/users
         chai.request(serverUrl)
             .post('/api/users/create')
             .send(user)
-            .end((err, res) => {  
+            .end((err, res) => {
                 res.should.have.status(200);
                 res.should.be.json;
                 res.body.should.be.a('object');
