@@ -12,13 +12,18 @@ controller.create = async (req, res) => {
         query.name = req.body.name;
         user = await Users.findOne(query).lean();
         if (user) {
-            return res.status(404).send('User already exist with the given name ' + query.name);
+            return res.status(200).send({"server_msg" : "User already exist!!"});
         } else {
             user = new Users(req.body);
             user.setPassword(req.body.password);
             user.bonus = 500;
             user = await user.save();
-            return res.status(200).send('User created successfully');
+            return res.status(200).send({
+                        "_id": user._id,
+                        "name": user.name,
+                        "bonus": user.bonus,
+                        "hotelBookings": user.hotelBookings
+                    });
         }
     } catch (err) {
         res.status(500).send('internal server error', err);

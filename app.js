@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const mongoose = require('mongoose');
+
 const env = require('./config/properties')
 const fs = require('fs');
 const bodyParser = require('body-parser');
@@ -10,11 +11,6 @@ const urlencode = bodyParser.urlencoded({
 app.use(bodyParser.json())
 
 
-fs.readdirSync(__dirname + '/model').forEach((file) => {
-    if (~file.indexOf('.js')) {
-        require(__dirname + '/model/' + file);
-    }
-});
 
 // Mongo Connection
 mongoose.connect(env.dbUrl, {
@@ -27,7 +23,17 @@ mongoose.connect(env.dbUrl, {
     .catch((err) => {
         console.log("connect to db failed ", err);
     });
+fs.readdirSync(__dirname + '/model').forEach((file) => {
+    if (~file.indexOf('.js')) {
+        require(__dirname + '/model/' + file);
+    }
+});
+const Users = mongoose.model('Users');
+const Hotel = mongoose.model('Hotel');
 
+ Users.deleteMany({}, (err) => { });
+        Hotel.deleteMany({}, (err) => {
+        });
 
 // Endpoints
 app.use('/api/hotel', require('./api/hotel'));
@@ -38,8 +44,12 @@ app.get('/', (req, res) => {
     res.send('Welcome to Home Page!!')
 });
 
-app.listen(env.port, function(err) {
+
+var server  = app.listen(env.port, function(err) {
     if (!err) {
         console.log("Node Js Server is listenig on 3000!")
     }
 });
+
+module.exports = {server,app,express} ;
+

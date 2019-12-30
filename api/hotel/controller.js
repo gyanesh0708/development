@@ -5,13 +5,24 @@ const controller = {};
 
 controller.create = async (req, res) => {
     try {
-        const hotel = await new Hotel(req.body);
-        await hotel.save();
-        return res.status(200).send(req.body);
-    } catch {
-        return res.status(500).send({
-            "server_msg": "Internal server error!!"
-        });
+
+        let hotel = await Hotel.findOne({ hotelName:req.body.hotelName}).lean();
+        if (hotel) {
+            return res.status(200).send({
+                "server_msg": "Hotel already exist!!"
+            });
+
+        } else {
+            const hotel = await new Hotel(req.body);
+            let newHotel = await hotel.save();
+            return res.status(200).send(newHotel);
+        }
+
+    } catch (error) {
+       return res.status(500).send({
+                "server_msg": error
+            });
+
     }
 
 }
@@ -76,7 +87,7 @@ controller.booking = async (req, res) => {
                 requestObj.uid = foundhotelBookingResult[j].uid
             }
         }
-        if (foundhotel && user && pendingBooking < 1) { 
+        if (foundhotel && user && pendingBooking < 1) {
             if (foundhotel.totalRoomsAvailabe >= 1 && user.bonus >= 200) {
                 bookingStatus = "BOOKED"
                 bookingAmt = -200
@@ -89,25 +100,25 @@ controller.booking = async (req, res) => {
                 }
                 let genericBookingCancelResponse = await genericBookingCancel(requestObj);
                 if (genericBookingCancelResponse.responseMsg != "Booking Cancel Success!!") {
-                  return  res.status(200).send({
+                    return res.status(200).send({
                         "hotelName": foundhotel.hotelName,
                         "totalRoomsAvailable": foundhotel.totalRoomsAvailabe,
                         "pendingBooking": pendingBooking,
                         "userBonus": user.bonus,
                         "server_msg": "Sorry we are not able to serve you at this moment!!"
                     });
-                }else{
+                } else {
                     foundhotel.totalRoomsAvailabe = foundhotel.totalRoomsAvailabe + 1
                 }
             }
             if (foundhotel.totalRoomsAvailabe == 0 && hotelPendingBooking == 0) {
-                return  res.status(200).send({
-                        "hotelName": foundhotel.hotelName,
-                        "totalRoomsAvailable": foundhotel.totalRoomsAvailabe,
-                        "pendingBooking": pendingBooking,
-                        "userBonus": user.bonus,
-                        "server_msg": "There is no room available at this moment!!"
-                    });
+                return res.status(200).send({
+                    "hotelName": foundhotel.hotelName,
+                    "totalRoomsAvailable": foundhotel.totalRoomsAvailabe,
+                    "pendingBooking": pendingBooking,
+                    "userBonus": user.bonus,
+                    "server_msg": "There is no room available at this moment!!"
+                });
             }
             let bookingObj = {
                 "uid": req.body.uid,
