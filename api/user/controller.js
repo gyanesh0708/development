@@ -26,7 +26,8 @@ controller.create = async (req, res) => {
                     });
         }
     } catch (err) {
-        res.status(500).send('internal server error', err);
+        console.log(err)
+        res.status(500).send('internal server error');
     }
 }
 
